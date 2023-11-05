@@ -1,11 +1,9 @@
 package user
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"uttc-hackathon/database"
-	"uttc-hackathon/firebaseinit"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -81,36 +79,36 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token, "user_id": user})
 }
 
-func Register(c *gin.Context) {
-	var user User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
+// func Register(c *gin.Context) {
+// 	var user User
+// 	if err := c.ShouldBindJSON(&user); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+// 		return
+// 	}
 
-	// Check if the username already exists
-	_, err := firebaseinit.AuthClient.GetUserByEmail(context.Background(), user.Username)
-	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
-		return
-	}
+// 	// Check if the username already exists
+// 	_, err := firebaseinit.AuthClient.GetUserByEmail(context.Background(), user.Username)
+// 	if err == nil {
+// 		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+// 		return
+// 	}
 
-	// Create a new user in Firebase Authentication
-	params := (&auth.UserToCreate{}).
-		Email(user.Username).
-		Password(user.Password)
+// 	// Create a new user in Firebase Authentication
+// 	params := (&auth.UserToCreate{}).
+// 		Email(user.Username).
+// 		Password(user.Password)
 
-	newUser, err := firebaseinit.AuthClient.CreateUser(context.Background(), params)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User registration failed: " + err.Error()})
-		return
-	}
+// 	newUser, err := firebaseinit.AuthClient.CreateUser(context.Background(), params)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User registration failed: " + err.Error()})
+// 		return
+// 	}
 
-	// Save user details to the local SQL database
-	saveUserToSQLDatabase(newUser.UID, user.Username, user.Username, user.Name, user.Age)
+// 	// Save user details to the local SQL database
+// 	saveUserToSQLDatabase(newUser.UID, user.Username, user.Username, user.Name, user.Age)
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
-}
+// 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+// }
 
 func VerifyPassword(password string, userRecord *auth.UserRecord) bool {
 	// Implement your password verification logic here

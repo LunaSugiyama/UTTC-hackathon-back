@@ -2,7 +2,6 @@
 package main
 
 import (
-	"log"
 	"uttc-hackathon/controller/blog"
 	"uttc-hackathon/controller/book"
 	"uttc-hackathon/controller/curriculum"
@@ -10,7 +9,6 @@ import (
 	itemcategory "uttc-hackathon/controller/item_category"
 	"uttc-hackathon/controller/user"
 	"uttc-hackathon/controller/video"
-	"uttc-hackathon/firebaseinit"
 	"uttc-hackathon/middlewares"
 
 	"uttc-hackathon/database"
@@ -20,10 +18,10 @@ import (
 
 func main() {
 	database.InitializeDB()
-	err := firebaseinit.InitFirebase() // Use the updated package name
-	if err != nil {
-		log.Fatalf("Error initializing Firebase: %v\n", err)
-	}
+	// err := firebaseinit.InitFirebase() // Use the updated package name
+	// if err != nil {
+	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
+	// }
 	// database.CreateItemCategoriesTable()
 	// database.CreateCurriculumsTable()
 	// database.CreateItemCurriculumsTable()
@@ -52,7 +50,7 @@ func main() {
 
 	usersGroup := r.Group("/users")
 	{
-		usersGroup.POST("/register", user.Register)
+		// usersGroup.POST("/register", user.Register)
 		usersGroup.POST("/login", user.Login)
 	}
 
