@@ -8,6 +8,6 @@ WORKDIR /app
 COPY . .
 
 # Build the Go application
-RUN go build -o .
+RUN go build -o app .
 # Run the Go application
-CMD ["./app/main.go"]
+CMD ["./app"]
