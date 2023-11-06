@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-
 	"uttc-hackathon/firebaseinit"
 
 	"github.com/gin-gonic/gin"
