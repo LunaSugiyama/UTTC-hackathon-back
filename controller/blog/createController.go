@@ -53,5 +53,16 @@ func CreateBlog(c *gin.Context) {
 	blog.CreatedAt = createdAt.Time
 	blog.UpdatedAt = updatedAt.Time
 
+	// Now, insert rows into the item_curriculums table for each curriculum ID
+	for _, curriculumID := range blog.CurriculumIDs {
+		insertItemCurriculumQuery := "INSERT INTO item_curriculums (item_id, item_categories_id, curriculum_id) VALUES (?, ?, ?)"
+		_, insertErr := database.DB.Exec(insertItemCurriculumQuery, blog.ID, blog.ItemCategoriesID, curriculumID)
+		if insertErr != nil {
+			log.Printf("Error inserting into item_curriculums table: %v", insertErr)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert into item_curriculums table"})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, blog)
 }

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"log"
 	"uttc-hackathon/controller/blog"
 	"uttc-hackathon/controller/book"
 	"uttc-hackathon/controller/curriculum"
@@ -9,6 +10,7 @@ import (
 	itemcategory "uttc-hackathon/controller/item_category"
 	"uttc-hackathon/controller/user"
 	"uttc-hackathon/controller/video"
+	"uttc-hackathon/firebaseinit"
 	"uttc-hackathon/middlewares"
 
 	"uttc-hackathon/database"
@@ -18,10 +20,10 @@ import (
 
 func main() {
 	database.InitializeDB()
-	// err := firebaseinit.InitFirebase() // Use the updated package name
-	// if err != nil {
-	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
-	// }
+	err := firebaseinit.InitFirebase() // Use the updated package name
+	if err != nil {
+		log.Fatalf("Error initializing Firebase: %v\n", err)
+	}
 	// database.CreateItemCategoriesTable()
 	// database.CreateCurriculumsTable()
 	// database.CreateItemCurriculumsTable()
@@ -36,6 +38,7 @@ func main() {
 	// database.DropVideosTable()
 	// database.CreateVideosTable()
 	// database.CreateStarredItemsTable()
+	database.CreateLikedItemsTable()
 	// ginMode := os.Getenv("GIN_MODE")
 	// gin.SetMode(ginMode)
 
@@ -50,8 +53,9 @@ func main() {
 
 	usersGroup := r.Group("/users")
 	{
-		// usersGroup.POST("/register", user.Register)
+		usersGroup.POST("/register", user.Register)
 		usersGroup.POST("/login", user.Login)
+		usersGroup.GET("/show", user.Show)
 	}
 
 	itemsGroup := r.Group("/items")
@@ -60,6 +64,10 @@ func main() {
 		itemsGroup.GET("/checkstarred", item.IsItemStarred)
 		itemsGroup.POST("/star", item.StarItem)
 		itemsGroup.POST("/unstar", item.UnstarItem)
+		itemsGroup.GET("/countlikes", item.CountLikes)
+		itemsGroup.GET("/checkliked", item.CheckLiked)
+		itemsGroup.POST("/like", item.LikeItem)
+		itemsGroup.POST("/unlike", item.UnlikeItem)
 	}
 
 	itemcategoryGroup := r.Group("/item_categories")
