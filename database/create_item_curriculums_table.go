@@ -14,7 +14,8 @@ func CreateItemCurriculumsTable() {
 		item_id INT, 
 		item_categories_id INT,
 		curriculum_id INT,
-		FOREIGN KEY (curriculum_id) REFERENCES curriculums(id)
+		FOREIGN KEY (curriculum_id) REFERENCES curriculums(id),
+		FOREIGN KEY (item_categories_id) REFERENCES item_categories(id)
 	)`
 
 	// Execute the SQL statement to create the 'item_curriculums' table

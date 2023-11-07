@@ -17,4 +17,5 @@ type Book struct {
 	CreatedAt          time.Time `json:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at"`
 	CurriculumIDs      []int     `json:"curriculum_ids"` // Added field for curriculum IDs
+	Images             []string  `json:"images"`
 }

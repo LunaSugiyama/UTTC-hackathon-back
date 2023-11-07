@@ -38,7 +38,8 @@ func main() {
 	// database.DropVideosTable()
 	// database.CreateVideosTable()
 	// database.CreateStarredItemsTable()
-	database.CreateLikedItemsTable()
+	// database.CreateLikedItemsTable()
+	// database.CreateItemImagesTable()
 	// ginMode := os.Getenv("GIN_MODE")
 	// gin.SetMode(ginMode)
 

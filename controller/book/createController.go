@@ -58,5 +58,16 @@ func CreateBook(c *gin.Context) {
 		}
 	}
 
+	// Now, insert rows into the item_images table for each image
+	for _, image := range book.Images {
+		insertItemImageQuery := "INSERT INTO item_images (item_id, item_categories_id, images, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
+		_, insertErr := database.DB.Exec(insertItemImageQuery, book.ID, book.ItemCategoriesID, image, book.CreatedAt, book.UpdatedAt)
+		if insertErr != nil {
+			log.Printf("Error inserting into item_images table: %v", insertErr)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert into item_images table"})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, book)
 }

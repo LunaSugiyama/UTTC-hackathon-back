@@ -20,4 +20,5 @@ type Blog struct {
 	CreatedAt          time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at" db:"updated_at"`
 	CurriculumIDs      []int     `json:"curriculum_ids"` // Added field for curriculum IDs
+	Images             []string  `json:"images"`
 }
