@@ -9,7 +9,6 @@ import (
 	itemcategory "uttc-hackathon/controller/item_category"
 	"uttc-hackathon/controller/user"
 	"uttc-hackathon/controller/video"
-	"uttc-hackathon/middlewares"
 
 	"uttc-hackathon/database"
 
@@ -42,8 +41,8 @@ func main() {
 	// gin.SetMode(ginMode)
 
 	r := gin.Default()
-	r.Use(middlewares.CORS())
-	// Register the AuthMiddleware for routes that require authentication.
+	// r.Use(middlewares.CORS())
+	// // Register the AuthMiddleware for routes that require authentication.
 	// r.Use(func(c *gin.Context) {
 	// 	if c.FullPath() != "/users/register" {
 	// 		middlewares.AuthMiddleware()(c)
