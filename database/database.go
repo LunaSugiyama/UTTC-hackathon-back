@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
 var DB *sql.DB
@@ -36,22 +34,4 @@ func InitializeDB() {
 	}
 
 	fmt.Printf("Database connection successful.")
-}
-
-func MakeTables(c *gin.Context) {
-	CreateItemCategoriesTable()
-	CreateCurriculumsTable()
-	CreateItemCurriculumsTable()
-	CreateUsersTable()
-	PasswordColumnToNull()
-	CreateBlogsTable()
-	CreateBooksTable()
-	CreateVideosTable()
-	CreateStarredItemsTable()
-	CreateLikedItemsTable()
-	CreateItemImagesTable()
-	if err := DB.Ping(); err != nil {
-		log.Fatalf("Error pinging the database: %v", err)
-	}
-	c.JSON(200, gin.H{"message": "Tables created successfully"})
 }
