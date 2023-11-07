@@ -21,17 +21,7 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
 	// }
-	database.CreateItemCategoriesTable()
-	database.CreateCurriculumsTable()
-	database.CreateItemCurriculumsTable()
-	database.CreateUsersTable()
-	database.PasswordColumnToNull()
-	database.CreateBlogsTable()
-	database.CreateBooksTable()
-	database.CreateVideosTable()
-	database.CreateStarredItemsTable()
-	database.CreateLikedItemsTable()
-	database.CreateItemImagesTable()
+
 	// ginMode := os.Getenv("GIN_MODE")
 	// gin.SetMode(ginMode)
 
@@ -43,6 +33,10 @@ func main() {
 	// 		middlewares.AuthMiddleware()(c)
 	// 	}
 	// })
+	dbGroup := r.Group("/db")
+	{
+		dbGroup.GET("/maketables", database.MakeTables)
+	}
 
 	usersGroup := r.Group("/users")
 	{
