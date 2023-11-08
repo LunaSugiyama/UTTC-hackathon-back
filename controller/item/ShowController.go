@@ -74,11 +74,22 @@ type ItemWithCurriculum struct {
 	ItemCategoriesName string
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
-	CurriculumID       int
 	CurriculumIDs      []int // New field to store curriculum_ids
 }
 
 func GetAllItems(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page_size parameter"})
+		return
+	}
+
 	var items []ItemWithCurriculum
 
 	// Get the sorting criteria from the query parameters
@@ -123,7 +134,7 @@ func GetAllItems(c *gin.Context) {
 		// Iterate through table names to retrieve items for each category
 		for _, tableName := range tableNames {
 			// Build the query based on curriculum and category
-			query := fmt.Sprintf("SELECT i.id, i.user_firebase_uid, i.title, i.author, i.link, i.likes, i.item_categories_id, icat.name AS item_category_name, i.created_at, i.updated_at, ic.curriculum_id FROM %s AS i "+
+			query := fmt.Sprintf("SELECT i.id, i.user_firebase_uid, i.title, i.author, i.link, i.likes, i.item_categories_id, icat.name AS item_category_name, i.created_at, i.updated_at FROM %s AS i "+
 				"INNER JOIN item_curriculums AS ic ON i.id = ic.item_id AND i.item_categories_id = ic.item_categories_id "+
 				"INNER JOIN item_categories AS icat ON ic.item_categories_id = icat.id "+
 				"WHERE ic.curriculum_id = ? ", tableName)
@@ -155,7 +166,7 @@ func GetAllItems(c *gin.Context) {
 				// Scan the data into the item struct
 				if err := rows.Scan(
 					&item.ID, &item.UserFirebaseUID, &item.Title, &item.Author, &item.Link,
-					&item.Likes, &item.ItemCategoriesID, &item.ItemCategoriesName, &CreatedAt, &UpdatedAt, &item.CurriculumID); err != nil {
+					&item.Likes, &item.ItemCategoriesID, &item.ItemCategoriesName, &CreatedAt, &UpdatedAt); err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan data from " + tableName})
 					return
 				}
@@ -189,12 +200,23 @@ func GetAllItems(c *gin.Context) {
 			}
 		}
 	}
+	// Calculate the offset based on the page and page size
+	offset := (page - 1) * pageSize
 
+	start := offset
+	end := offset + pageSize
+	if start < 0 {
+		start = 0
+	}
+	if end > len(items) {
+		end = len(items)
+	}
+	pagedItems := items[start:end]
 	// Implement sorting logic based on the specified sortField and sortOrder
-	sortItems(items, sortField, sortOrder)
+	sortItems(pagedItems, sortField, sortOrder)
 
 	// Return the combined and sorted data from all tables as JSON
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, pagedItems)
 }
 
 // Helper function to parse a comma-separated list of integers
@@ -257,7 +279,16 @@ func sortItemsByTime(items []ItemWithCurriculum, sortField string, order string)
 				return timeI.After(timeJ)
 			}
 		})
+	case "likes":
+		sort.Slice(items, func(i, j int) bool {
+			if order == "asc" {
+				return items[i].Likes < items[j].Likes
+			} else {
+				return items[i].Likes > items[j].Likes
+			}
+		})
 	}
+
 }
 
 // Helper function to sort items by integer field (e.g., item_categories_id)

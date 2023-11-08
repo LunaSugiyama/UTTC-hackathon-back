@@ -27,6 +27,7 @@ func GetBook(c *gin.Context) {
 	var createdAt mysql.NullTime
 	var updatedAt mysql.NullTime
 	var curriculumIDs string
+	var Images string
 
 	// Convert the bookID to an integer
 	id, err := strconv.Atoi(bookID)
@@ -37,16 +38,26 @@ func GetBook(c *gin.Context) {
 
 	// Query the database to retrieve the book entry by ID, including associated curriculum IDs
 	query := `
-        SELECT b.*, icat.name, GROUP_CONCAT(ic.curriculum_id) AS curriculum_ids
-        FROM books AS b
-        LEFT JOIN item_curriculums AS ic ON b.id = ic.item_id AND b.item_categories_id = ic.item_categories_id
-		LEFT JOIN item_categories AS icat ON b.item_categories_id = icat.id
-        WHERE b.id = ?
-        GROUP BY b.id
+	SELECT b.*, icat.name, GROUP_CONCAT(ic.curriculum_id) AS curriculum_ids, GROUP_CONCAT(IFNULL(ii.images, '')) AS images
+	FROM books AS b
+	LEFT JOIN item_categories AS icat ON b.item_categories_id = icat.id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(images) AS images
+		FROM item_images
+		GROUP BY item_id, item_categories_id
+	) AS ii ON b.id = ii.item_id AND b.item_categories_id = ii.item_categories_id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(curriculum_id) AS curriculum_id
+		FROM item_curriculums
+		GROUP BY item_id, item_categories_id
+	) AS ic ON b.id = ic.item_id AND b.item_categories_id = ic.item_categories_id
+	WHERE b.id = ?
+	GROUP BY b.id
+	
     `
 	err = database.DB.QueryRow(query, id).Scan(
 		&book.ID, &book.UserFirebaseUID, &book.Title, &book.Author, &book.Link, &book.Likes, &book.ItemCategoriesID, &book.Explanation,
-		&createdAt, &updatedAt, &book.ItemCategoriesName, &curriculumIDs,
+		&createdAt, &updatedAt, &book.ItemCategoriesName, &curriculumIDs, &Images,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -71,6 +82,10 @@ func GetBook(c *gin.Context) {
 			book.CurriculumIDs = append(book.CurriculumIDs, id)
 		}
 	}
+
+	// Split the images into a slice
+	imageslice := strings.Split(Images, ",")
+	book.Images = append(book.Images, imageslice...)
 
 	// Book entry found, return it as JSON
 	c.JSON(http.StatusOK, book)

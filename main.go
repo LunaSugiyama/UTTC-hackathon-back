@@ -6,9 +6,11 @@ import (
 	"uttc-hackathon/controller/book"
 	"uttc-hackathon/controller/curriculum"
 	"uttc-hackathon/controller/item"
+	"uttc-hackathon/controller/item/comment"
 	itemcategory "uttc-hackathon/controller/item_category"
 	"uttc-hackathon/controller/user"
 	"uttc-hackathon/controller/video"
+	"uttc-hackathon/middlewares"
 
 	"uttc-hackathon/database"
 
@@ -21,20 +23,20 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
 	// }
-	database.CreateItemCategoriesTable()
-	database.CreateCurriculumsTable()
-	database.CreateItemCurriculumsTable()
-	database.CreateUsersTable()
-	database.PasswordColumnToNull()
-	database.CreateBlogsTable()
-	database.CreateBooksTable()
-	database.CreateVideosTable()
-	database.CreateStarredItemsTable()
-	database.CreateLikedItemsTable()
-	database.CreateItemImagesTable()
+	// database.CreateItemCategoriesTable()
+	// database.CreateCurriculumsTable()
+	// database.CreateItemCurriculumsTable()
+	// database.CreateUsersTable()
+	// database.CreateBlogsTable()
+	// database.CreateBooksTable()
+	// database.CreateVideosTable()
+	// database.CreateStarredItemsTable()
+	// database.CreateLikedItemsTable()
+	// database.CreateItemImagesTable()
+	database.CreateItemCommentsTable()
 
 	r := gin.Default()
-	// r.Use(middlewares.CORS())
+	r.Use(middlewares.CORS())
 	// // Register the AuthMiddleware for routes that require authentication.
 	// r.Use(func(c *gin.Context) {
 	// 	if c.FullPath() != "/users/register" {
@@ -51,6 +53,13 @@ func main() {
 
 	itemsGroup := r.Group("/items")
 	{
+		commentsGroup := itemsGroup.Group("/comments")
+		{
+			commentsGroup.POST("/create", comment.CreateItemComment)
+			commentsGroup.GET("/get", comment.ShowItemComment)
+			commentsGroup.PUT("/update", comment.UpdateItemComment)
+			commentsGroup.DELETE("/delete", comment.DeleteItemComment)
+		}
 		itemsGroup.GET("/showall", item.GetAllItems)
 		itemsGroup.GET("/checkstarred", item.IsItemStarred)
 		itemsGroup.POST("/star", item.StarItem)
@@ -59,6 +68,7 @@ func main() {
 		itemsGroup.GET("/checkliked", item.CheckLiked)
 		itemsGroup.POST("/like", item.LikeItem)
 		itemsGroup.POST("/unlike", item.UnlikeItem)
+		itemsGroup.POST("/search", item.SearchItems)
 	}
 
 	itemcategoryGroup := r.Group("/item_categories")

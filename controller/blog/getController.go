@@ -27,6 +27,7 @@ func GetBlog(c *gin.Context) {
 	var createdAt mysql.NullTime
 	var updatedAt mysql.NullTime
 	var curriculumIDs string
+	var Images string
 
 	// Convert the blogID to an integer
 	id, err := strconv.Atoi(blogID)
@@ -37,16 +38,26 @@ func GetBlog(c *gin.Context) {
 
 	// Query the database to retrieve the blog entry by ID
 	query := `
-    SELECT blogs.*, item_categories.name, GROUP_CONCAT(item_curriculums.curriculum_id) AS curriculum_ids
-    FROM blogs
-    LEFT JOIN item_categories ON blogs.item_categories_id = item_categories.id
-	LEFT JOIN item_curriculums ON blogs.id = item_curriculums.item_id AND blogs.item_categories_id = item_curriculums.item_categories_id
-    WHERE blogs.id = ?
-	GROUP BY blogs.id
+	SELECT b.*, icat.name, GROUP_CONCAT(ic.curriculum_id) AS curriculum_ids, GROUP_CONCAT(IFNULL(ii.images, '')) AS images
+	FROM blogs AS b
+	LEFT JOIN item_categories AS icat ON b.item_categories_id = icat.id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(images) AS images
+		FROM item_images
+		GROUP BY item_id, item_categories_id
+	) AS ii ON b.id = ii.item_id AND b.item_categories_id = ii.item_categories_id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(curriculum_id) AS curriculum_id
+		FROM item_curriculums
+		GROUP BY item_id, item_categories_id
+	) AS ic ON b.id = ic.item_id AND b.item_categories_id = ic.item_categories_id
+	WHERE b.id = ?
+	GROUP BY b.id
+	
 `
 	err = database.DB.QueryRow(query, id).Scan(
 		&blog.ID, &blog.UserFirebaseUID, &blog.Title, &blog.Author, &blog.Link, &blog.Likes,
-		&blog.ItemCategoriesID, &blog.Explanation, &createdAt, &updatedAt, &blog.ItemCategoriesName, &curriculumIDs,
+		&blog.ItemCategoriesID, &blog.Explanation, &createdAt, &updatedAt, &blog.ItemCategoriesName, &curriculumIDs, &Images,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -71,6 +82,9 @@ func GetBlog(c *gin.Context) {
 			blog.CurriculumIDs = append(blog.CurriculumIDs, id)
 		}
 	}
+
+	imageslice := strings.Split(Images, ",")
+	blog.Images = append(blog.Images, imageslice...)
 
 	// Blog entry found, return it as JSON
 	c.JSON(http.StatusOK, blog)

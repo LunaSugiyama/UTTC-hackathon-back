@@ -1,35 +1,12 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 )
 
 func CreateVideosTable() {
-	// Load environment variables from the .env file
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("Error loading .env file:", err)
-		return
-	}
-	// mysqlUser := os.Getenv("MYSQL_USER")
-	// mysqlPwd := os.Getenv("MYSQL_PASSWORD")
-	// mysqlDatabase := os.Getenv("MYSQL_DATABASE")
-
-	mysqlUser := "test_user"
-	mysqlPwd := "password"
-	mysqlDatabase := "test_hackathon"
-
-	connStr := fmt.Sprintf("%s:%s@tcp(%s:3307)/%s", mysqlUser, mysqlPwd, "localhost", mysqlDatabase)
-	db, err := sql.Open("mysql", connStr)
-	if err != nil {
-		fmt.Println("Error opening database:", err)
-		return
-	}
-	defer db.Close()
-
 	// Create a table for the 'users' table
 	createVideosTableSQL := `
 	create table videos (
@@ -48,7 +25,7 @@ func CreateVideosTable() {
 	)`
 
 	// Execute the SQL statement to create the 'users' table
-	_, err = db.Exec(createVideosTableSQL)
+	_, err := DB.Exec(createVideosTableSQL)
 	if err != nil {
 		fmt.Println("Error creating 'Videos' table:", err)
 		return

@@ -27,6 +27,7 @@ func GetVideo(c *gin.Context) {
 	var createdAt mysql.NullTime
 	var updatedAt mysql.NullTime
 	var curriculumIDs string
+	var Images string
 
 	// Convert the videoID to an integer
 	id, err := strconv.Atoi(videoID)
@@ -37,16 +38,26 @@ func GetVideo(c *gin.Context) {
 
 	// Query the database to retrieve the video entry by ID, including associated curriculum IDs
 	query := `
-        SELECT v.*, icat.name, GROUP_CONCAT(ic.curriculum_id) AS curriculum_ids
-        FROM videos AS v
-        LEFT JOIN item_curriculums AS ic ON v.id = ic.item_id AND v.item_categories_id = ic.item_categories_id
-        LEFT JOIN item_categories AS icat ON v.item_categories_id = icat.id
-		WHERE v.id = ?
-        GROUP BY v.id
+	SELECT b.*, icat.name, GROUP_CONCAT(ic.curriculum_id) AS curriculum_ids, GROUP_CONCAT(IFNULL(ii.images, '')) AS images
+	FROM videos AS b
+	LEFT JOIN item_categories AS icat ON b.item_categories_id = icat.id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(images) AS images
+		FROM item_images
+		GROUP BY item_id, item_categories_id
+	) AS ii ON b.id = ii.item_id AND b.item_categories_id = ii.item_categories_id
+	LEFT JOIN (
+		SELECT item_id, item_categories_id, GROUP_CONCAT(curriculum_id) AS curriculum_id
+		FROM item_curriculums
+		GROUP BY item_id, item_categories_id
+	) AS ic ON b.id = ic.item_id AND b.item_categories_id = ic.item_categories_id
+	WHERE b.id = ?
+	GROUP BY b.id
+	
     `
 	err = database.DB.QueryRow(query, id).Scan(
 		&video.ID, &video.UserFirebaseUID, &video.Title, &video.Link, &video.Author, &video.Likes, &video.ItemCategoriesID, &video.Explanation,
-		&createdAt, &updatedAt, &video.ItemCategoriesName, &curriculumIDs,
+		&createdAt, &updatedAt, &video.ItemCategoriesName, &curriculumIDs, &Images,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -70,6 +81,10 @@ func GetVideo(c *gin.Context) {
 			video.CurriculumIDs = append(video.CurriculumIDs, id)
 		}
 	}
+
+	// Split the images into a slice
+	imagesSlice := strings.Split(Images, ",")
+	video.Images = append(video.Images, imagesSlice...)
 
 	// Video entry found, return it as JSON
 	c.JSON(http.StatusOK, video)

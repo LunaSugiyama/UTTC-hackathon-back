@@ -36,6 +36,22 @@ func LikeItem(c *gin.Context) {
 		return
 	}
 
+	getItemCategoriesQuery := "SELECT name FROM item_categories WHERE id = ?"
+	err = database.DB.QueryRow(getItemCategoriesQuery, likedItem.ItemCategoriesID).Scan(&itemName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(itemName)
+
+	// Update the "likes" column in the "items" table for the liked item
+	query := fmt.Sprintf("UPDATE %s SET likes = likes + 1 WHERE id = ?", itemName)
+	_, err = database.DB.Exec(query, likedItem.ItemID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Insert a new record into the "starred_items" table
 	_, err = database.DB.Exec("INSERT INTO liked_items (user_firebase_uid, item_id, item_categories_id) VALUES (?, ?, ?)", likedItem.UserFirebaseUID, likedItem.ItemID, likedItem.ItemCategoriesID)
 	if err != nil {
