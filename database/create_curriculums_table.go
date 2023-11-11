@@ -25,3 +25,37 @@ func CreateCurriculumsTable() {
 
 	fmt.Println("'curriculums' table created successfully with new columns.")
 }
+
+func PopulateCurriculumsTable() {
+	curriculums := []string{
+		"エディタ(IDE)",
+		"OSコマンド(とシェル)",
+		"Git",
+		"Github",
+		"HTML & CSS",
+		"Javascript",
+		"React",
+		"React x Typescript",
+		"SQL",
+		"Docker",
+		"Go",
+		"HTTP Server (Go)",
+		"RDBMS(MySQL)へ接続(Go)",
+		"Unit Test(Go)",
+		"フロントエンドとバックエンドの接続",
+		"CI (Continuous Integration)",
+		"CD (Continuous Deployment)",
+		"認証",
+		"ハッカソンの準備",
+		"ハッカソンの概要"}
+
+	for _, curriculum := range curriculums {
+		insertSQL := `INSERT INTO curriculums (name) VALUES (?)`
+		_, err := DB.Exec(insertSQL, curriculum)
+		if err != nil {
+			fmt.Printf("Error inserting curriculum %s: %v\n", curriculum, err)
+		} else {
+			fmt.Printf("Curriculum '%s' added successfully.\n", curriculum)
+		}
+	}
+}

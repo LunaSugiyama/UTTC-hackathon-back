@@ -24,8 +24,9 @@ func main() {
 	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
 	// }
 	// database.CreateItemCategoriesTable()
-	// database.CreateCurriculumsTable()
-	// database.CreateItemCurriculumsTable()
+	database.CreateCurriculumsTable()
+	// database.PopulateCurriculumsTable()
+	database.CreateItemCurriculumsTable()
 	// database.CreateUsersTable()
 	// database.CreateBlogsTable()
 	// database.CreateBooksTable()
@@ -69,6 +70,7 @@ func main() {
 		itemsGroup.POST("/like", item.LikeItem)
 		itemsGroup.POST("/unlike", item.UnlikeItem)
 		itemsGroup.POST("/search", item.SearchItems)
+		itemsGroup.GET("/related", item.GetItemsSimilarity)
 	}
 
 	itemcategoryGroup := r.Group("/item_categories")

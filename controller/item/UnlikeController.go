@@ -15,7 +15,6 @@ func UnlikeItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println("likeditem", likedItem)
 
 	// Check if the item to unlike exists in the "liked_items" table
 	if !recordLikedExists(likedItem.UserFirebaseUID, likedItem.ItemID, likedItem.ItemCategoriesID) {
@@ -26,6 +25,27 @@ func UnlikeItem(c *gin.Context) {
 
 	// Remove the record from the "liked_items" table
 	_, err := database.DB.Exec("DELETE FROM liked_items WHERE user_firebase_uid = ? AND item_id = ? AND item_categories_id = ?", likedItem.UserFirebaseUID, likedItem.ItemID, likedItem.ItemCategoriesID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retrieve the name from the "item_categories" table
+	itemName, err := getItemCategoryName(likedItem.ItemCategoriesID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	getItemCategoriesQuery := "SELECT name FROM item_categories WHERE id = ?"
+	err = database.DB.QueryRow(getItemCategoriesQuery, likedItem.ItemCategoriesID).Scan(&itemName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	query := fmt.Sprintf("UPDATE %s SET likes = likes - 1 WHERE id = ?", itemName)
+	_, err = database.DB.Exec(query, likedItem.ItemID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
