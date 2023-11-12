@@ -70,6 +70,7 @@ func GetItemsSimilarity(c *gin.Context) {
 
 	var items []ItemConcatenated
 	items, err = getALLItems()
+	fmt.Println("items: ", items)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve items"})
 		return
@@ -88,6 +89,8 @@ func GetItemsSimilarity(c *gin.Context) {
 func CosineSimilarity(text1, text2 string, language string) float64 {
 	// Tokenize and remove stopwords from the input text
 	var words1, words2 []string
+	fmt.Println("text1: ", text1)
+	fmt.Println("text2: ", text2)
 
 	if language == "ja" {
 		// For Japanese text, use custom tokenization logic
@@ -194,4 +197,101 @@ func removeStopwords(words []string) []string {
 	}
 
 	return filteredWords
+}
+
+func getALLItems() ([]ItemConcatenated, error) {
+	var items []ItemConcatenated
+
+	// Parse item_categories and curriculum_ids into slices of integers
+	var itemCategories []int
+	var curriculumIDs []int
+
+	// Get all curriculum IDs from the categories table
+	curriculumIDsAll, err := getAllCurriculumIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map to track unique item categories for each item
+	uniqueItemCategories := make(map[string]bool)
+
+	// Iterate through curriculum IDs and table names to retrieve filtered items
+	for _, curriculumID := range curriculumIDsAll {
+		// Iterate through the tableNames (or categories) and retrieve items for each curriculum
+		tableNames, err := getTableNames()
+		if err != nil {
+			return nil, err
+		}
+
+		// Iterate through table names to retrieve items for each category
+		for _, tableName := range tableNames {
+			// Build the query based on curriculum and category
+			query := fmt.Sprintf("SELECT i.id, i.user_firebase_uid, i.title, i.author, i.link, i.explanation, i.likes, i.item_categories_id, icat.name AS item_category_name, i.created_at, i.updated_at, CONCAT(i.title, ' ', i.author, ' ', icat.name, ' ', i.explanation) AS concatenated_info FROM %s AS i "+
+				"INNER JOIN item_curriculums AS ic ON i.id = ic.item_id AND i.item_categories_id = ic.item_categories_id "+
+				"INNER JOIN item_categories AS icat ON ic.item_categories_id = icat.id "+
+				"WHERE ic.curriculum_id = ? ", tableName)
+
+			// If item_categories or curriculum_ids are provided, modify the query
+			if len(itemCategories) > 0 {
+				query += "AND i.item_categories_id IN (" + intListToSQL(itemCategories) + ") "
+			}
+			if len(curriculumIDs) > 0 {
+				query += "AND ic.curriculum_id IN (" + intListToSQL(curriculumIDs) + ") "
+			}
+
+			rows, err := database.DB.Query(query, curriculumID) // Provide both curriculumID and tableName as arguments
+
+			if err != nil {
+				// Log the error for debugging
+				fmt.Printf("Error executing query: %v", err)
+				return nil, err
+			}
+			defer rows.Close()
+
+			// Retrieve and append data from the table
+			for rows.Next() {
+				var item ItemConcatenated
+
+				var CreatedAt, UpdatedAt mysql.NullTime
+
+				// Scan the data into the item struct
+				if err := rows.Scan(
+					&item.ID, &item.UserFirebaseUID, &item.Title, &item.Author, &item.Link, &item.Explanation,
+					&item.Likes, &item.ItemCategoriesID, &item.ItemCategoriesName, &CreatedAt, &UpdatedAt, &item.ConcatenatedText); err != nil {
+					fmt.Println("error in scan")
+					fmt.Println(err)
+					return nil, err
+				}
+
+				// Convert NullTime to time.Time if not null
+				if CreatedAt.Valid {
+					item.CreatedAt = CreatedAt.Time
+				}
+				if UpdatedAt.Valid {
+					item.UpdatedAt = UpdatedAt.Time
+				}
+
+				// Retrieve and add the curriculum IDs for this item
+				curriculumIDs, err := getCurriculumIDsForItem(item.ID, item.ItemCategoriesID)
+				if err != nil {
+					fmt.Println("error: Failed to retrieve curriculum IDs for item")
+					return nil, err
+				}
+				item.CurriculumIDs = curriculumIDs // Assign the curriculum IDs to the item
+
+				// Create a unique identifier for the item based on item_id and item_categories_id
+				itemIdentifier := fmt.Sprintf("%d-%d", item.ID, item.ItemCategoriesID)
+
+				// Check if this item is unique based on the item identifier
+				if !uniqueItemCategories[itemIdentifier] {
+					// If it's unique, append it to the items slice and mark it as displayed
+					items = append(items, item)
+					uniqueItemCategories[itemIdentifier] = true
+				}
+
+			}
+		}
+	}
+	return items, nil
+
 }
