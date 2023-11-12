@@ -29,7 +29,7 @@ func CreateBlog(c *gin.Context) {
 	result, dbErr := database.DB.Exec(query, blog.UserFirebaseUID, blog.Title, blog.Author, blog.Link, blog.ItemCategoriesID, blog.Explanation, time.Now())
 	if dbErr != nil {
 		log.Printf("Error inserting blog entry into the database: %v", dbErr)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert blog entry"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert blog entry", "message": dbErr.Error(), "blog": blog})
 		return
 	}
 
