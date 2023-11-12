@@ -25,3 +25,21 @@ func CreateItemCategoriesTable() {
 
 	fmt.Println("'item_categories' table created successfully with new columns.")
 }
+
+func PopulateItemCategoriesTable() {
+	item_categories := []string{
+		"blogs",
+		"books",
+		"videos",
+	}
+
+	for _, item_category := range item_categories {
+		insertSQL := `INSERT INTO item_categories (name) VALUES (?)`
+		_, err := DB.Exec(insertSQL, item_category)
+		if err != nil {
+			fmt.Printf("Error inserting item_category %s: %v\n", item_category, err)
+		} else {
+			fmt.Printf("Item_category '%s' added successfully.\n", item_category)
+		}
+	}
+}
