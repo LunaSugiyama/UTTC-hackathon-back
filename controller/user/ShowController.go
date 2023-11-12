@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"uttc-hackathon/database"
 	"uttc-hackathon/model"
@@ -24,12 +25,14 @@ func Show(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User does not exist"})
 		return
 	}
+	fmt.Println("user: ", user)
 
 	user, err := getUserData(FirebaseUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user data"})
 		return
 	}
+	fmt.Println("user: ", user)
 
 	c.JSON(http.StatusOK, user)
 

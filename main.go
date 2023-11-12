@@ -50,6 +50,7 @@ func main() {
 		usersGroup.POST("/register", user.Register)
 		usersGroup.POST("/login", user.Login)
 		usersGroup.GET("/show", user.Show)
+		usersGroup.PUT("/update", user.Update)
 	}
 
 	itemsGroup := r.Group("/items")
