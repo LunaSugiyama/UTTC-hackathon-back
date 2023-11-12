@@ -24,9 +24,9 @@ func main() {
 	// 	log.Fatalf("Error initializing Firebase: %v\n", err)
 	// }
 	// database.CreateItemCategoriesTable()
-	database.PopulateItemCategoriesTable()
+	// database.PopulateItemCategoriesTable()
 	database.CreateCurriculumsTable()
-	// database.PopulateCurriculumsTable()
+	database.PopulateCurriculumsTable()
 	database.CreateItemCurriculumsTable()
 	// database.CreateUsersTable()
 	// database.CreateBlogsTable()
