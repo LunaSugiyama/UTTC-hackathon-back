@@ -3,7 +3,10 @@ package main
 
 import (
 	"uttc-hackathon/database"
+	"uttc-hackathon/middlewares"
 	"uttc-hackathon/router"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -33,7 +36,10 @@ func main() {
 	// 	}
 	// })
 
-	r := router.SetupRouter()
+	r := gin.Default()
+	r.Use(middlewares.CORS())
+
+	r = router.SetupRouter(r) // Pass the Gin engine instance as an argument
 
 	r.Run(":8000")
 }
