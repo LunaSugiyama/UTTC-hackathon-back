@@ -9,7 +9,7 @@ import (
 // User represents the structure of the 'blogs' table in the database.
 type Blog struct {
 	ID                 int       `json:"id" db:"id"`
-	UserFirebaseUID    string    `json:"user_id" db:"user_id"`
+	UserFirebaseUID    string    `json:"user_firebase_uid" db:"user_firebase_uid"`
 	Title              string    `json:"title" db:"title"`
 	Author             string    `json:"author" db:"author"`
 	Link               string    `json:"link" db:"link"`

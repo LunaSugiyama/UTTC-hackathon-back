@@ -6,7 +6,7 @@ import (
 
 type Book struct {
 	ID                 int       `json:"id"`
-	UserFirebaseUID    string    `json:"user_id"`
+	UserFirebaseUID    string    `json:"user_firebase_uid" db:"user_firebase_uid"`
 	Title              string    `json:"title"`
 	Author             string    `json:"author"`
 	Link               string    `json:"link"`

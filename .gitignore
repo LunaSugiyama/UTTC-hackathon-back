@@ -1,4 +1,2 @@
 .env
 .env_mysql
-
-./database/database.go

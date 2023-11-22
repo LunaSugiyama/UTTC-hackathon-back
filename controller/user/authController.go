@@ -1,77 +1,66 @@
 package user
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-	"uttc-hackathon/database"
-	"uttc-hackathon/model"
+// import (
+// 	"fmt"
+// 	"log"
+// 	"net/http"
+// 	"uttc-hackathon/database"
+// 	"uttc-hackathon/model"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-)
+// 	"github.com/gin-gonic/gin"
+// )
 
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
+// func Login(c *gin.Context) {
+// 	var data LoginData
 
-type LoginData struct {
-	UID     string `json:"uid"`
-	IDToken string `json:"idToken"`
-}
+// 	if err := c.ShouldBindJSON(&data); err != nil {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+// 		return
+// 	}
 
-func Login(c *gin.Context) {
-	var data LoginData
+// 	uid := data.UID
+// 	idToken := data.IDToken
+// 	// fmt.Println(user)
+// 	fmt.Println("token", idToken)
+// 	fmt.Println("uid", uid)
 
-	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
-		return
-	}
+// 	if idToken == "" {
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+// 		return
+// 	}
 
-	uid := data.UID
-	idToken := data.IDToken
-	// fmt.Println(user)
-	fmt.Println("token", idToken)
-	fmt.Println("uid", uid)
+// 	c.JSON(http.StatusOK, gin.H{"token": idToken, "uid": uid})
+// }
 
-	if idToken == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
-		return
-	}
+// func Register(c *gin.Context) {
+// 	var user model.User
+// 	if err := c.ShouldBindJSON(&user); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": idToken, "uid": uid})
-}
+// 	// Check if the required parameters are set
+// 	if user.FirebaseUID == "" || user.Name == "" || user.Email == "" || user.Age == 0 {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required parameters"})
+// 		return
+// 	}
 
-func Register(c *gin.Context) {
-	var user model.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
+// 	saveUserToSQLDatabase(user.FirebaseUID, user.Email, user.Email, user.Name, user.Age)
 
-	// Check if the required parameters are set
-	if user.FirebaseUID == "" || user.Name == "" || user.Email == "" || user.Age == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required parameters"})
-		return
-	}
+// 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+// }
 
-	saveUserToSQLDatabase(user.FirebaseUID, user.Email, user.Email, user.Name, user.Age)
+// func saveUserToSQLDatabase(firebaseUID, username, email, name string, age int) {
+// 	insertUserSQL := `
+//         INSERT INTO users (firebase_uid, username, email, name, age, created_at) VALUES (?, ?, ?, ?, ?, NOW())`
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
-}
+// 	_, err := database.DB.Exec(insertUserSQL, firebaseUID, username, email, name, age)
+// 	if err != nil {
+// 		log.Printf("Error saving user to SQL database: %v", err)
+// 		// You might want to return an error response here, or handle the error according to your application's logic.
+// 		return
+// 	}
 
-func saveUserToSQLDatabase(firebaseUID, username, email, name string, age int) {
-	insertUserSQL := `
-        INSERT INTO users (firebase_uid, username, email, name, age, created_at) VALUES (?, ?, ?, ?, ?, NOW())`
-
-	_, err := database.DB.Exec(insertUserSQL, firebaseUID, username, email, name, age)
-	if err != nil {
-		log.Printf("Error saving user to SQL database: %v", err)
-		// You might want to return an error response here, or handle the error according to your application's logic.
-		return
-	}
-
-	// User successfully inserted into the database
-	log.Printf("User inserted into the database.")
-}
+// 	// User successfully inserted into the database
+// 	log.Printf("User inserted into the database.")
+// }

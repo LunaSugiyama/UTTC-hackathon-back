@@ -59,3 +59,20 @@ func PopulateCurriculumsTable() {
 		}
 	}
 }
+
+// DropCurriculumsTable drops the 'curriculums' table if it exists
+func DropCurriculumsTable() {
+	// Drop the 'curriculums' table if it exists
+	DropCurriculumsTableSQL := `
+        DROP TABLE IF EXISTS curriculums
+    `
+
+	// Execute the SQL statement to drop the 'curriculums' table
+	_, err := DB.Exec(DropCurriculumsTableSQL)
+	if err != nil {
+		fmt.Println("Error dropping 'curriculums' table:", err)
+		return
+	}
+
+	fmt.Println("'curriculums' table dropped successfully.")
+}
