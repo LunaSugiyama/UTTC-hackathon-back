@@ -7,14 +7,15 @@ import (
 	"uttc-hackathon/controller/user"
 	"uttc-hackathon/dao"
 	"uttc-hackathon/database"
+	"uttc-hackathon/middlewares"
 	"uttc-hackathon/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(r *gin.Engine) *gin.Engine {
-	// r := gin.Default()
-	// r.Use(middlewares.CORS())
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+	r.Use(middlewares.CORS())
 
 	// Setup for each group of routes
 	setupUserRoutes(r)
