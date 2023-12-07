@@ -2,6 +2,13 @@
 
 I participated in a hackathon and this is the code server side. <br />
 I created a simple knowledgebase; a website to store websites, books, videos so you could search for it afterwards.
+I used 
+- Firebase Authentication
+- Firebase Cloud Storage
+- Vercel
+- Google Cloud Platform
+- golang
+- typescript (react)
 
 ## Description
 
