@@ -13,6 +13,12 @@ type itemCategoryUsecase struct {
 	itemCategoryDAO dao.ItemCategoryDAO
 }
 
+func NewItemCategoryUsecase(itemCategoryDAO dao.ItemCategoryDAO) ItemCategoryUsecase {
+	return &itemCategoryUsecase{
+		itemCategoryDAO: itemCategoryDAO,
+	}
+}
+
 func (ic *itemCategoryUsecase) ShowAllItemCategories() ([]model.ItemCategory, error) {
 	return ic.itemCategoryDAO.ShowAllItemCategories()
 }

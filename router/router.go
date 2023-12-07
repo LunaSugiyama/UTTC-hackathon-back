@@ -3,8 +3,6 @@ package router
 
 import (
 	"uttc-hackathon/controller"
-	itemcategory "uttc-hackathon/controller/item_category"
-	"uttc-hackathon/controller/user"
 	"uttc-hackathon/dao"
 	"uttc-hackathon/database"
 	"uttc-hackathon/middlewares"
@@ -39,7 +37,7 @@ func setupUserRoutes(r *gin.Engine) {
 		usersGroup.POST("/register", userController.RegisterUser)
 		usersGroup.POST("/login", userController.LoginUser)
 		usersGroup.GET("/show", userController.ShowUser)
-		usersGroup.PUT("/update", user.Update)
+		// usersGroup.PUT("/update", userController.Update)
 	}
 }
 
@@ -78,9 +76,12 @@ func setupItemRoutes(r *gin.Engine) {
 }
 
 func setupItemCategoryRoutes(r *gin.Engine) {
+	item_categoryDao := dao.NewItemCategoryDAO()
+	item_categoryUsecase := usecase.NewItemCategoryUsecase(item_categoryDao)
+	item_categoryController := controller.NewItemCategoryController(item_categoryUsecase)
 	itemcategoryGroup := r.Group("/item_categories")
 	{
-		itemcategoryGroup.GET("/showall", itemcategory.ShowAllItemCategories)
+		itemcategoryGroup.GET("/showall", item_categoryController.ShowAllItemCategories)
 	}
 }
 
